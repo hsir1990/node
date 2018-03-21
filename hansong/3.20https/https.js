@@ -10,13 +10,13 @@ const fs = require('fs');
 const port = 5000;
 //定义参数
 const options = {
-    key : fs.readFileSync('./server.pem'),
+    key : fs.readFileSync('./server.pem'),//这是我在ssl目录下生成的server.key改名为server.pem
     
     cert : fs.readFileSync('./cert.pem'),
 
-    requestCert : true, 
+    requestCert : true, //请求客户端证书
 
-    rejectUnauthorized : false
+    rejectUnauthorized : false //如果没有请求到客户端来自信任CA颁发的证书，拒绝客户端的连接
 }
 
 let servers = https.createServer(options, (req, res) => {
