@@ -14,3 +14,4 @@ let servers = http.createServer((req, res) => {
 }).listen(5000, () => {
     console.log('监听5000成功')
 })
+console.log(global)

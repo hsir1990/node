@@ -1,4 +1,5 @@
 'use strict'
+// 模块用于实现URL参数字符串与参数对象的互相转换
 const querystring = require('querystring');
 
 querystring.parse('name=hsir&sex=name&sex=nv');
