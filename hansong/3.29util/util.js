@@ -65,3 +65,33 @@ util.isDate();
 // 如果给定的参数object是一个错误对象则返回true，否则返回false
 util.isError(new Error());
 util.isError(new TypeError());
+
+
+
+
+
+
+
+
+
+
+var vm = require("vm");
+var util = require("util");
+ 
+var window = {
+    p: 2,
+    vm: vm,
+    console: console,
+    require: require
+};
+ 
+window.global = window;
+ 
+var p = 5;
+ 
+global.p = 11;
+ 
+vm.runInNewContext('p = 3;console.log(typeof global);require(\'vm\').runInThisContext("console.log(p)");', window);
+
+// object (global存在）
+//     11 （顶部global的p)

@@ -1,0 +1,1 @@
+// N-API（在信件中发音为N，接着是API）是用于构建本地插件的API。它独立于底层的JavaScript运行时（ex V8），并作为Node.js本身的一部分进行维护。这个API将是跨Node.js版本稳定的应用程序二进制接口（ABI）。它旨在将Addons与基础JavaScript引擎中的更改隔离，并允许为一个版本编译的模块在更高版本的Node.js上运行，而无需重新编译。
