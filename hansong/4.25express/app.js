@@ -9,6 +9,7 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 
+
 // // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -27,7 +28,7 @@ app.use(cookieParser());
 // 控制静态文件,通过 Express 内置的 express.static 可以方便地托管静态文件，例如图片、CSS、JavaScript 文件等。
 app.use(express.static(path.join(__dirname, 'public')));
 // 指定一个挂载路径的方式
-app.use('/static', express.static(path.join(__dirname, 'files')))
+// app.use('/static', express.static(path.join(__dirname, 'files')))
 
 
 // // get请求
@@ -70,5 +71,6 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
+app.locals.title = 'My App';
+console.log(app.locals.title,'111111111111')
 module.exports = app;
