@@ -1,3 +1,5 @@
+import { request } from 'https';
+
 const Koa = require('koa');
 const app = new Koa();
 
@@ -235,7 +237,95 @@ const app = new Koa();
 //     console.error('srver error', err);
 // })
 
+// // 需要注意的是，如果错误被try...catch捕获，就不会触发error事件。这时，必须调用ctx.app.emit()，手动释放error事件，才能让监听函数生效。请看下面的例子（完整代码看这里）。
+
+// const handler = async (ctx, next) => {
+//     try{
+//         await next();
+//     }catch(err) {
+//         ctx.response.status = err.statusCode || err.status || 500;
+//         ctx.response.type = 'html';
+//         ctx.response.body = '<p>Something wrong, please contact administrator.</p>';
+//         ctx.app.emit('srror', err, ctx);
+//     }
+// };
+
+// const main13 = ctx => {
+//     ctx.throw(500);
+// };
+
+// app.on('error', function(err){
+//     console.log('logging error', err.message);
+//     console.log(err);
+// })
+
+// app.use(handler);
+// app.use(main13)
+
+// const main14 = function(ctx) {
+//     const n = Number(ctx.cookies.get('view') || 0) +1;
+//     ctx.cookies.set('view', n);
+//     ctx.response.body = n + ' view';
+
+// }
+
+// app.use(main14)
 
 
+
+// const koaBody = require('koa-body');
+
+// // const main = async function(ctx) {
+// //     const body = ctx.request.body;
+// //     if(!body.name) ctx.throw(400, '.name required');
+// //     ctx.body = {name : body.name}
+// // }
+
+// // app.use(boaBody());
+// // app.use(main);
+
+
+// const main = async function(ctx) {
+//     const body = ctx.request.body;
+//     if (!body.name) ctx.throw(400, '.name required');
+//     ctx.body = { name: body.name };
+//   };
+  
+//   app.use(koaBody());
+//   app.use(main);
+
+//   $ curl -X POST --data "name=Jack" 127.0.0.1:3000
+// {"name":"Jack"}
+
+// $ curl -X POST --data "name" 127.0.0.1:3000
+// name required
+
+
+
+// koa-body模块还可以用来处理文件上传。
+const os = require('os');
+const path = require('path');
+const koaBody = require('koa-body');
+const fs = require('fs');
+
+const main = async function(ctx) {
+    const tmpdir = os.tmpdir();
+    const filePaths = [];
+    const files = ctx.request.body.files ||　{};
+
+    for(let key in files) {
+        const file = files[key];
+        const filePath = path.join(tmpdir, file.name);
+        const reader = fs.createReadStream(file.path);
+        const writer = fs.createWriteStream(filePath);
+        reader.pipe(writer);
+        filePaths.push(filePath);
+    }
+
+    ctx.body = filePaths;
+}
+
+app.use(koaBody({multipart : true}));
+app.use(main);
 // 监听3000
 app.listen(3000);
