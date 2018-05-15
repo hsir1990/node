@@ -246,7 +246,7 @@ const app = new Koa();
 //         ctx.response.status = err.statusCode || err.status || 500;
 //         ctx.response.type = 'html';
 //         ctx.response.body = '<p>Something wrong, please contact administrator.</p>';
-//         ctx.app.emit('srror', err, ctx);
+//         ctx.app.emit('error', err, ctx);
 //     }
 // };
 
@@ -309,6 +309,7 @@ const koaBody = require('koa-body');
 const fs = require('fs');
 
 const main = async function(ctx) {
+    // os.tmpdir()返回操作系统的默认临时文件夹
     const tmpdir = os.tmpdir();
     const filePaths = [];
     const files = ctx.request.body.files ||　{};
