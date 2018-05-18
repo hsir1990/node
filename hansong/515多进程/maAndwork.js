@@ -6,7 +6,7 @@ var  numCPUs = require('os').cpus().length;
 if(cluster.isMaster){
     console.log('[master] ' + 'start master.........');
 
-    for(let i = 0; i < numCPUs.length; i++){
+    for(var i = 0; i < numCPUs; i++){
         // 创建worker进程
         var wk = cluster.fork();
         // master给worker发送消息。注：worker给发master发送消息要用process.send(message)
@@ -39,7 +39,7 @@ if(cluster.isMaster){
     // 遍历cluster.workers；
     function eachWorker(callback) {
         for(var id in cluster.workers) {
-            callback(cluster.worker[id]);
+            callback(cluster.workers[id]);
         }
     }
 
@@ -49,13 +49,13 @@ if(cluster.isMaster){
             worker.send('[master] ' + 'send message to worker' + worker.id);
         })
     }, 3000)
-console.log(cluster.workers,'1234567')
-Object.keys(cluster.isWorker).forEach(function(id){
-    // 监听master和worker的message事件
-    cluster.worker[id].on('message', function(msg){
-        console.log('[master] ' + 'message ' + msg);
+    console.log(cluster.workers,'1234567')
+    Object.keys(cluster.isWorker).forEach(function(id){
+        // 监听master和worker的message事件
+        cluster.worker[id].on('message', function(msg){
+            console.log('[master] ' + 'message ' + msg);
+        })
     })
-})
     // 判断是不是worker节点
 }else if(cluster.isWorker){
     // worker.id: 进程ID号
