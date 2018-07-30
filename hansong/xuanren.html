@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>分享候选人</title>
+    <style>
+    *{
+        margin :0;
+        padding: 0;
+        text-align: center;
+        font-size: 30px;
+    }
+    input{
+        margin-top: 300px; 
+    }
+    div{
+        margin-top: 30px; 
+        color: #ccc;
+        border: 1px solid #ccc;
+        display: inline-block;  
+        cursor:pointer;
+    }
+    a{
+        /* padding: 10px 50px; */
+    }
+    
+    .name{
+        width: 700px;
+        color: #000;
+    }
+    .submit:hover{
+        margin-top: 30px; 
+        color: #000;
+        border: 1px solid #000;
+    }
+
+    </style>
+</head>
+<body>
+    <div class="name">参与人：韩松，孙婷婷，冰冰，陈国瑞，魏磊，潘建，刘勇，魏星，孙良超，魏星，付泽波，刘畅，高飞，尹伟琪</div>
+    <br />
+    <input type="text">
+    <div class="submit"><a>请点击</a></div>
+</body>
+<script>
+    const oInput = document.querySelector('input');
+    const oDiv = document.querySelector('.submit');
+    const oA = document.querySelector('a');
+    let arr = ['韩松','孙婷婷','冰冰','陈国瑞','魏磊','潘建','刘勇','魏星','孙良超','付泽波','刘畅','高飞','尹伟琪'];
+    var flag = true;
+    var  timer = null;
+    var random = -1;
+    function name(arr) {
+        
+
+        clearInterval(timer);
+
+        timer = setInterval(function(){
+            // 随机排
+            var random = Math.floor(Math.random() * arr.length);
+            // debugger
+            
+
+            // 顺序排
+            // random ++;
+            // if (random == arr.length){
+            //     random = 0;
+            // }
+            oInput.value=arr[random];
+        },5)
+    };
+    oDiv.addEventListener('click', function () {
+        if(flag){
+            name(arr);
+            oDiv.innerText = '请停止';
+            flag = false;
+        }else{
+            clearInterval(timer);
+            oDiv.innerText = '请点击'
+            flag = true;
+        }
+        
+    })
+
+</script>
+</html>
