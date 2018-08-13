@@ -4,7 +4,7 @@ const crypto = require('crypto');
 
 const url = require('url');
 const querystring = require('querystring');
-const router = require('router');
+const router = require('./router');
 
 
 // get方法后者post方法的使用
