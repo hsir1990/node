@@ -1,0 +1,257 @@
+NodeJS学习笔记之FS文件模块
+2016年05月09日 17:24:20
+阅读数：1893
+一，开篇分析
+
+文件系统模块是一个简单包装的标准 POSIX 文件 I/O 操作方法集。可以通过调用 require("fs") 来获取该模块。文件系统模块中的所有方法均有异步和同步版本。
+
+（1），文件系统模块中的异步方法需要一个完成时的回调函数作为最后一个传入形参。
+
+（2），回调函数的构成由调用的异步方法所决定，通常情况下回调函数的第一个形参为返回的错误信息。
+
+（3），如果异步操作执行正确并返回，该错误形参则为null或者undefined。如果使用的是同步版本的操作方法，一旦出现错误，会以通常的抛出错误的形式返回错误。
+
+（4），可以用try和catch等语句来拦截错误并使程序继续进行。
+
+我们先看一个简单的例子，读取文件（"bb.txt"）:
+
+（1），建立文件"bb.txt“，如下内容（”大家好，我是大雄君！(*^__^*) 嘻嘻……“）。
+
+（2），读取文件操作如下代码：
+
+复制代码代码如下:
+
+ var fs = require("fs") ;
+ fs.readFile("bb.txt","utf8",function (error,data){
+     if(error) throw error ;
+     console.log(data) ;
+ }) ;
+运行结果：
+
+
+
+这里要注意的是：读取文件一定要设置编码，否则默认是 ”buffer“ 形式出现。
+
+再看没设置的运行效果，区别还是很明显的。如下：
+
+
+
+再来一个写操作，如下：
+
+复制代码代码如下:
+
+ var fs = require("fs") ;
+ var txt = "大家要好好学习NodeJS啊！！！" ;
+ //写入文件
+ fs.writeFile("bb.txt",txt,function (err) {
+     if (err) throw err ;
+     console.log("File Saved !"); //文件被保存
+ }) ;
+运行结果：
+
+
+
+在列举一些常用的实例：
+
+复制代码代码如下:
+
+// 删除文件
+fs.unlink('bb.txt', function(){
+console.log('success') ;
+}) ;
+// 修改文件名称
+fs.rename('bb.txt','bigbear.txt',function(err){
+console.log('rename success') ;
+});
+// 查看文件状态
+fs.stat('bb.txt', function(err, stat){
+ console.log(stat);
+});
+// 判断文件是否存在
+fs.exists('bb.txt', function( exists ){
+   console.log( exists ) ;
+}) ;
+二，Fs与Stream之间的联系
+
+"Stream" 具有异步的特性。我么可以将一个文件或一段内容分为未知个制定大小的 "chunk" 去读取，每读取到一个 "chunk" 我们就将他输出。直到文件读完。这就像 "http1.1" 种支持的 "Transfer-Encoding: chunked" 那样。 ("chunk"可以以任何的形式存在，NodeJS默认是以 "Buffer" 的形式存在，这样更高效)。NodeJS中的"Stream"具备Unix系统上的一个超级特性就是 ("pipe" ------ 管道)。
+
+还记得 “Http模块那篇” 第一个NodeJS程序， "Hello,大熊！" 吗？我们基于那个小程序做一下修改，如下代码：
+
+（1），建立“bb.html”
+
+复制代码代码如下:
+
+ <html>
+     <head>
+         <style type="text/css">
+             div {
+                 　　margin-top: 50px;
+                　　 width: 100%; 
+                   　margin: 0px;
+                 　　height:120px;
+                 　　line-height:120px;
+                    color:#fff;
+                    font-size:22px;
+                    background:#ff9900;
+                 　 text-align: center;
+             }
+         </style>
+     </head>
+     <body>
+         <div>Hello,大熊！</div>
+     </body>
+ </html>
+（2），修改之前的程序如下：
+
+复制代码代码如下:
+
+ var http = require('http') ;
+ var fs = require("fs") ;
+ var server = http.createServer(function(req,res){
+     fs.readFile("bb.html","utf-8", function(err, data){
+       if(err) {
+           res.writeHead(500, {'Context-Type': 'text/plain'});
+           res.end('specify file not exists! or server error!');
+       }
+       else{
+         res.writeHead(200, {'Context-Type': 'text/html'});
+         res.write(data);
+         res.end();
+       }
+   })
+ }) ;
+ server.listen(8888) ;
+ console.log("http server running on port 8888 ...") ;
+以下是运行结果：
+
+
+
+香港4日自由行四人减200元毕业季亲子游
+【点击进入】
+上海到香港旅游携程1003元起. 更多上海到香港旅游精选线路只在携程.
+查 看
+ 
+现在我们需要思考一下，如果我们要发送的不是一个单纯的文本文件而是超媒体文件比如说 Google 2014 IO 大会 的全程高清视频文件。mp4 格式。长度2个多小时1080p。
+
+大概4个多GB。已知 "readFile" 的工作方式是将文件读取到内存。那么这么大一个文件显然是不能这么做的。那该怎么办呢？是之后就需要使用 stream 的来做。那么是这样的。
+
+代码如下像这样：
+
+复制代码代码如下:
+
+fs.createReadStream(__dirname + '/vedio.mp4').pipe(res) ;
+总结一下：
+
+这些代码可以实现需要的功能，但是服务在发送文件数据之前需要缓存整个文件数据到内存，如果"bb.html"文件很 
+大并且并发量很大的话，会浪费很多内存。因为用户需要等到整个文件缓存到内存才能接受的文件数据，这样导致 
+用户体验相当不好。不过还好 "(req, res)" 两个参数都是Stream，这样我们可以用fs.createReadStream()代替"fs.readFile()"。
+
+三，实例
+
+来一个文件上传的小栗子：
+
+（1），建立“server.js”
+
+复制代码代码如下:
+
+ var http = require('http');
+ var url = require('url');
+ function start(route, handler) {
+     function onRequest (request, response) {
+         var pathname = url.parse(request.url).pathname;
+         // 路由到相应的业务逻辑
+         route (pathname, handler, response, request);
+     }
+     http.createServer(onRequest).listen(3000);
+     console.log('server is starting');
+ }
+ exports.start = start;
+（2），建立“route.js”
+
+复制代码代码如下:
+
+ function route (pathname, handler, response, request) {
+     console.log('about to route a request for ' + pathname);
+     if (typeof handler[pathname] === 'function') {
+         return handler[pathname](response, request);
+     } else {
+         console.log('no request handler found for ' + pathname);
+         response.writeHead(404, {'Content-Type': 'text/html'});
+         response.write('404 Not Found!');
+         response.end();
+     }
+ }
+ exports.route = route;
+（3），建立“requestHandler.js”
+
+复制代码代码如下:
+
+var querystring = require('querystring'),
+    fs = require('fs'),
+    formidable = require('formidable');
+function start (response, request) {
+    console.log('start module');
+  var body = '<html>'+
+      '<head>'+
+      '<meta http-equiv="Content-Type" '+
+      'content="text/html; charset=UTF-8" />'+
+      '</head>'+
+      '<body>'+
+      '<form action="/upload" enctype="multipart/form-data" method="post">'+
+      '<input type="file" name="upload" multiple="multiple">'+
+      '<input type="submit" value="Submit text" />'+
+      '</form>'+
+      '</body>'+
+      '</html>';
+    response.writeHead(200, {'Content-Type': 'text/html'});
+    response.write(body);
+    response.end();
+}
+function upload (response, request) {
+    console.log('upload module');
+    var form = new formidable.IncomingForm();
+    form.parse(request, function (error, fields, files) {
+        fs.renameSync(files.upload.path, '/tmp/test.png');
+        response.writeHead(200, {'Content-Type': 'text/html'});
+        response.write('You\'ve sent: <br />');
+        response.write('<img src="/show" />');
+        response.end();
+    });
+}
+function show (response, request) {
+    console.log('show module');
+    fs.readFile ('/tmp/test.png', 'binary', function (error, file) {
+        if (error) {
+            response.writeHead(200, {'Content-Type': 'text/html'});
+            response.write(error);
+            response.end();
+        } else {
+            response.writeHead(200, {'Content-Type': 'image/png'});
+            response.write(file, 'binary');
+            response.end();
+        }
+    });
+}
+exports.start = start;
+exports.upload = upload;
+exports.show= show;
+（4），建立“index.js”
+
+复制代码代码如下:
+
+ var server = require('./server');
+ var router = require('./router');
+ var requestHandler = require('./requestHandler');
+ var formidable = require('formidable'); // require路径搜索算法？？
+ var handler = {};
+ handler['/'] = requestHandler.start;
+ handler['/start'] = requestHandler.start;
+ handler['/upload'] = requestHandler.upload;
+ handler['/show'] = requestHandler.show;
+ server.start(router.route, handler);
+四，总结一下
+
+（1），理解 "Fs与Stream之间的联系" 。
+（2），熟练使用 "FS" 相关的api。
+（3），注意细节的把控，比如： 文件操作api同步方式与异步方式之间的处理细节。
+（4），最后强调：理解文件上传例子中的代码组织方式，不断重构，不断总结。
