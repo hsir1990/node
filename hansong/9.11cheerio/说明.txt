@@ -1,0 +1,7 @@
+superagent 页面数据下载
+cheerio 页面数据解析
+
+
+
+superagent  与 request 
+都是对http.get和http.request的封装
