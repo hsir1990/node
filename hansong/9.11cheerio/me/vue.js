@@ -37,21 +37,19 @@ const zhixing = async function(options,callback){
     }) 
 }
 
-var index = '';
-for(let i =0; i<3; i++){
-    index = i+1;
+
     var options = {
-        hostname: 'nihaole.com',
-        port: 80, 
-        path: '/brand/index_p'+index+'.html',
+        hostname: 'deploy.devops.7lk.me',
+        port: '', 
+        path: '/#/table',
         method: 'GET',
         headers: {
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-            // "Accept-Encoding": "gzip, deflate",//控制编码
+            "Accept-Encoding": "gzip, deflate",//控制编码
             "Accept-Language": "zh-CN,zh;q=0.9",
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "Cookie": "siteid=10000297; __51cke__=; 1000029770375285=1; 1000029770371374=1; __tins__15788118=%7B%22sid%22%3A%201536821512988%2C%20%22vd%22%3A%2015%2C%20%22expires%22%3A%201536825068055%7D; __51laig__=15",
+            "Cookie": "cookie_token=eHNrSVQwV3pmTm44anBmc1htR2F5c1hQ",
             "Host": "nihaole.com",
             "Pragma": "no-cache",
             "Referer":" http://nihaole.com/brand/index_p3.html",
@@ -63,6 +61,8 @@ for(let i =0; i<3; i++){
     zhixing(options,function(dataStr){
         console.log(dataStr,'dataStr===')
         let $ = cheerio.load(dataStr);
+        console.log($('#app').html(),'$===')
+        console.log($('title').text(),'$===')
         let gongsiName = $('.Temp2moduleWrap .content .companyInfo .title');
         let j=0;
         let urlStr = '';
@@ -73,7 +73,7 @@ for(let i =0; i<3; i++){
             console.log(indexZhi)
             gongsiList += (indexZhi+"."+ gongsiName.eq(indexZhi).text());
             urlStr = $('.Temp2moduleWrap .content .companyInfo .btnBox a').eq(indexZhi).attr('href');
-                console.log(urlStr)
+                // console.log(urlStr)
                 congsiDetal(urlStr)   
         }
         fs.writeFileSync('./chong.txt',gongsiList, {flag:'a'})
@@ -82,50 +82,3 @@ for(let i =0; i<3; i++){
         console.log($('.Temp2moduleWrap .content .companyInfo .title').eq(0).text(),'结束========')
     
     })
-}
-
-
-
-async function congsiDetal(urlStr){
-    let gongDetail = ''
-    const detResponse = await new Promise((resolve, reject) =>{
-        http.get(urlStr, (res) => {
-            res.on('data', (chunk) => {
-                gongDetail += chunk;
-            });
-            
-                res.on('end', () => {
-                    let $D = cheerio.load(gongDetail);
-                    fs.writeFileSync('zi.txt',$D('.displayRight .row').text(),{flag:'a'})
-                    // var url = 'http://nihaole.com/Public/Images/404error.jpg';
-                    var url = 'http://nihaole.com/Public/Images/Links/hc_logo.png';
-                    // var url = "http://s0.hao123img.com/res/img/logo/logonew.png";
-                    let path = './aa/'
-                    saveImg(url, path)  
-                })
-            
-        })  
-    })
-}
-
-
-//保存图片
-async function saveImg(url, path){
-    const imgResponse = await new Promise(resolve => {
-        http.get(url,function(req, res){
-            var imgData = '';
-            req.setEncoding('binary');//一定要设置response的编码为binary否则会下载下来的图片打不开
-            //  binary 是二进制,不是编码格式
-            req.on('data', function(chunk){
-                imgData += chunk;
-            });
-            req.on('end', function(){
-                // fs.writeFile(path,imgData,'binary', function(err){
-                fs.writeFile('./logonew.png',imgData,'binary', function(err){
-                    console.log('保存图片成功'+path);
-                })
-            })
-        })
-    })
-    
-}
